@@ -9,6 +9,9 @@ pub enum Expr {
 pub enum Statement {
     // The '__print("value");'.
     NativePrint(Expr),
+
+    // The '__println("value");'.
+    NativePrintln(Expr),
 }
 
 // The program.

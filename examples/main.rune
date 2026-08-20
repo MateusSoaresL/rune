@@ -1,2 +1,2 @@
 __print("Hello, ");
-__print("world!\n");
+__println("world!");

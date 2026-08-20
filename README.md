@@ -1,6 +1,6 @@
 # Rune
 
-> **Version:** 0.0.1  
+> **Version:** 0.0.2  
 > **Status:** Early Development  
 > **Implementation Language:** Rust  
 > **Compilation:** Native / AOT
@@ -17,29 +17,12 @@ Rune source files use the `.rune` extension.
 
 Rune is currently in a very early stage of development.
 
-### Printing
+### println
 
-Rune provides the native `__print` instruction:
-
-```rune
-__print("Hello, world!");
-```
-
-### Escape Sequences
-
-Rune supports sequences inside string literals:
-
-| Escape | Description    |
-|--------|----------------|
-| `\n`   |    New line    |
-| `\t`   | Horizontal tab |
-| `\"`   |  Double quote  |
-| `\\`   |   Blackslash   |
-
-Example:
+Rune provides the native `__println` instruction, and have a line break:
 
 ```rune
-__print("Hello, world!\n");
+__println("Hello, world!");
 ```
 
 ## 📦 Installation

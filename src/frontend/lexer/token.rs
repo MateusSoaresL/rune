@@ -3,6 +3,7 @@
 pub enum TokenKind {
     // Keywords:
     NativePrint, // __print
+    NativePrintln, // __println
 
     // Literals:
     LeftParen,  // (

@@ -2,6 +2,7 @@
 #[derive(Debug)]
 pub enum IrInstructions {
     PrintString(String),
+    PrintlnString(String),
 }
 
 // The ir program.

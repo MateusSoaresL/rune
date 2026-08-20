@@ -44,7 +44,7 @@ impl Lexer {
 
     // This function will check the '"' in the code.
     fn string(&mut self, line: usize, column: usize) -> Token {
-        // Here is the value in '__print("value");'.
+        // Here is the value in '__print("value");' and '__println("value");'.
         let mut value = String::new();
 
         // This code will check if is at end.
@@ -133,9 +133,10 @@ impl Lexer {
             }
         }
 
-        // Check the token kind, example: '__print'.
+        // Check the token kind, example: '__print' and '__println'.
         let kind = match word.as_str() {
             "__print" => TokenKind::NativePrint, // Return the 'NativePrint'.
+            "__println" => TokenKind::NativePrintln, // Return the 'NativePrintln'.
 
             // Return error.
             _ => {

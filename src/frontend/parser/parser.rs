@@ -97,6 +97,20 @@ impl Parser {
         Ok(Statement::NativePrint(value)) // Return the Native Print.
     }
 
+    // This function will be responsible about the '__println' (NativePrintln).
+    fn __println_statement(&mut self) -> Result<Statement, ()> {
+        self.advance(); // Advance the '__println'.
+        self.consume(TokenKind::LeftParen)?; // Consume the '('.
+
+        // Will check the string literal.
+        let value = self.expression()?;
+
+        self.consume(TokenKind::RightParen)?; // Consume the ')'.
+        self.consume(TokenKind::Semicolon)?; // Consume the ';'.
+
+        Ok(Statement::NativePrintln(value)) // Return the Native Println.
+    }
+
     // This function will be responsible about to valid the statements.
     fn statement(&mut self) -> Result<Statement, ()> {
         // Will check the statements.
@@ -104,8 +118,17 @@ impl Parser {
             return self.__print_statement(); // return the '__print_statement();'.
         }
 
+        if self.check(TokenKind::NativePrintln) {
+            return self.__println_statement(); // return the '__println_statement();'.
+        }
+
+        let token = self.peek();
+
         // Return token error and show the line in Parser.
-        todo!("Unknwon statement! (Parser at line 104)")
+        eprintln!("Unknwon statement at {}:{}!", token.line, token.column);
+
+        // Returns the error, if have error.
+        Err(())
     }
 
     // The principal parser function.
