@@ -1,9 +1,7 @@
 var language = "Rune";
 
-__print("Name: ");
-__println(language);
+__println("Name: ${language}");
 
 language = "Rune 2";
 
-__print("Name: ");
-__println(language);
+__println("Name: ${language}");

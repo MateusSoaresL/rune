@@ -1,5 +1,5 @@
 // This 'enum' save the Token kinds.
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum TokenKind {
     // Keywords:
     NativePrint,   // __print

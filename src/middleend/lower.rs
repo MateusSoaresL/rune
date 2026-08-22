@@ -1,5 +1,5 @@
 use crate::{
-    frontend::ast::ast::{Expr, Program, Statement},
+    frontend::ast::ast::{Expr, Program, Statement, StringPart},
     middleend::ir::{IrInstructions, IrProgram},
 };
 
@@ -22,6 +22,20 @@ pub fn lower(program: Program) -> IrProgram {
                 Expr::Variable(name) => {
                     instructions.push(IrInstructions::PrintVariable(name));
                 }
+
+                Expr::InterpolatedString(parts) => {
+                    for part in parts {
+                        match part {
+                            StringPart::Text(value) => {
+                                instructions.push(IrInstructions::PrintString(value));
+                            }
+
+                            StringPart::Variable(name) => {
+                                instructions.push(IrInstructions::PrintVariable(name));
+                            }
+                        }
+                    }
+                }
             },
 
             // '__println("value");'.
@@ -33,6 +47,32 @@ pub fn lower(program: Program) -> IrProgram {
 
                 Expr::Variable(name) => {
                     instructions.push(IrInstructions::PrintlnVariable(name));
+                }
+
+                Expr::InterpolatedString(parts) => {
+                    let total = parts.len();
+
+                    for (index, part) in parts.into_iter().enumerate() {
+                        let is_last = index + 1 == total;
+
+                        match part {
+                            StringPart::Text(value) => {
+                                if is_last {
+                                    instructions.push(IrInstructions::PrintlnString(value));
+                                } else {
+                                    instructions.push(IrInstructions::PrintString(value));
+                                }
+                            }
+
+                            StringPart::Variable(name) => {
+                                if is_last {
+                                    instructions.push(IrInstructions::PrintlnVariable(name));
+                                } else {
+                                    instructions.push(IrInstructions::PrintVariable(name));
+                                }
+                            }
+                        }
+                    }
                 }
             },
 

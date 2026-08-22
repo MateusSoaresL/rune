@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::frontend::ast::ast::{Expr, Program, Statement};
+use crate::frontend::ast::ast::{Expr, Program, Statement, StringPart};
 
 // Create a data, if the variable is mutable or not.
 pub struct Symbol {
@@ -42,6 +42,27 @@ impl SemanticAnalyzer {
                     eprintln!("Undefined variable '{}'!", name);
 
                     return Err(());
+                }
+
+                Ok(())
+            }
+
+            Expr::InterpolatedString(parts) => {
+                for part in parts {
+                    match part {
+                        StringPart::Text(_) => {}
+
+                        StringPart::Variable(name) => {
+                            if !self.symbols.contains_key(name) {
+                                eprintln!(
+                                    "Undefined variable '{}' in string in interpolation",
+                                    name
+                                );
+
+                                return Err(());
+                            }
+                        }
+                    }
                 }
 
                 Ok(())

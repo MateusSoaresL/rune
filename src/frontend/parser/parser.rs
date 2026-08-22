@@ -1,4 +1,4 @@
-use crate::frontend::ast::ast::{Expr, Program, Statement};
+use crate::frontend::ast::ast::{Expr, Program, Statement, StringPart};
 use crate::frontend::lexer::token::{Token, TokenKind};
 // Is the principal parser structure, and save some information's parser.
 pub struct Parser {
@@ -65,22 +65,98 @@ impl Parser {
         Err(())
     }
 
+    // The Rune interpolation.
+    fn parse_string_expression(
+        &self,
+        value: String,
+        line: usize,
+        column: usize,
+    ) -> Result<Expr, ()> {
+        // Standard strings, without interpolation.
+        if !value.contains("${") {
+            return Ok(Expr::String(value));
+        }
+
+        let chars: Vec<char> = value.chars().collect();
+
+        let mut parts: Vec<StringPart> = Vec::new();
+        let mut text = String::new();
+        let mut current = 0;
+
+        while current < chars.len() {
+            // Found '${'.
+            if chars[current] == '$' && current + 1 < chars.len() && chars[current + 1] == '{' {
+                // Save the empty previous text.
+                if !text.is_empty() {
+                    parts.push(StringPart::Text(std::mem::take(&mut text)));
+                }
+
+                // Jump '${'.
+                current += 2;
+
+                let mut name = String::new();
+
+                // Read to the '}'.
+                while current < chars.len() && chars[current] != '}' {
+                    name.push(chars[current]);
+                    current += 1;
+                }
+
+                // Arrived to the end, and do not found '}'.
+                if current >= chars.len() {
+                    eprintln!("Unclosed interpolation at {}:{}", line, column);
+
+                    return Err(());
+                }
+
+                if name.is_empty() {
+                    eprintln!("Empty interpolation at {}:{}", line, column);
+
+                    return Err(());
+                }
+
+                parts.push(StringPart::Variable(name));
+
+                // Jump '}'.
+                current += 1;
+            } else {
+                text.push(chars[current]);
+                current += 1;
+            }
+        }
+
+        // The text left after the last interpolation.
+        if !text.is_empty() {
+            parts.push(StringPart::Text(text));
+        }
+
+        Ok(Expr::InterpolatedString(parts))
+    }
+
     // Parser read the expression and transforms her in AST's Expr.
     fn expression(&mut self) -> Result<Expr, ()> {
         // Take the expression and advance.
-        let token = self.advance();
+        let (kind, line, column) = {
+            let token = self.peek();
+
+            (token.kind.clone(), token.line, token.column)
+        };
+
+        self.advance();
 
         // Will check the token kind.
-        match &token.kind {
+        match kind {
             // Will check the string literal.
-            TokenKind::StringLiteral(value) => Ok(Expr::String(value.clone())),
+            TokenKind::StringLiteral(value) => {
+                self.parse_string_expression(value.clone(), line, column)
+            }
 
             // Identifier.
             TokenKind::Identifier(name) => Ok(Expr::Variable(name.clone())),
 
             // Return token error and show the line in Parser.
             _ => {
-                eprintln!("Invalid expression! At {}:{}", token.line, token.column);
+                eprintln!("Invalid expression! At {}:{}", line, column);
                 Err(())
             }
         }

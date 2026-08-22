@@ -1,6 +1,6 @@
 # Rune
 
-> **Version:** 0.0.3-alpha.1
+> **Version:** 0.0.3
 > **Status:** Early Development
 > **Implementation Language:** Rust
 > **Compilation:** Native / AOT
@@ -17,17 +17,15 @@ Rune source files use the `.rune` extension.
 
 Rune is currently in a very early stage of development.
 
-### Variables
+### Interpolation
 
-Rune provides the native variables:
+Rune supports interpolation:
 
-`let` for imutable variables.
+```rune
+let name = "Mateus";
 
-`var` for mutable variables.
-
-### Type supported: String
-
-`String` is the unique type Rune support now.
+println("Name: ${name}.");
+```
 
 ## 📦 Installation
 

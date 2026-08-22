@@ -1,8 +1,17 @@
+// For variables.
+#[derive(Debug)]
+pub enum StringPart {
+    Text(String),     // The text.
+    Variable(String), // The variable.
+}
+
 // Expression.
 #[derive(Debug)]
 pub enum Expr {
     String(String),   // The variable string.
     Variable(String), // The variable.
+
+    InterpolatedString(Vec<StringPart>),
 }
 
 // The statement.
