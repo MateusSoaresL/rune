@@ -2,8 +2,10 @@
 #[derive(Debug, PartialEq)]
 pub enum TokenKind {
     // Keywords:
-    NativePrint, // __print
+    NativePrint,   // __print
     NativePrintln, // __println
+    Let,           // Imutable variable.
+    Var,           // Mutable variable.
 
     // Literals:
     LeftParen,  // (
@@ -12,7 +14,11 @@ pub enum TokenKind {
     // Others:
     Semicolon, // ;
 
+    // Operators:
+    Equal, // =
+
     // Identifier and literal string:
+    Identifier(String),
     StringLiteral(String),
 
     // Specials:

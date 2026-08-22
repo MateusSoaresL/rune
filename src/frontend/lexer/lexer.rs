@@ -126,7 +126,7 @@ impl Lexer {
             let character = self.source[self.current]; // Is the character.
 
             // Check if is a letter or a number.
-            if character.is_alphanumeric() || character == '_' {
+            if character.is_ascii_alphanumeric() || character == '_' {
                 word.push(self.advance()); // Save and advance.
             } else {
                 break; // Break if is not.
@@ -138,11 +138,11 @@ impl Lexer {
             "__print" => TokenKind::NativePrint, // Return the 'NativePrint'.
             "__println" => TokenKind::NativePrintln, // Return the 'NativePrintln'.
 
+            "let" => TokenKind::Let, // Returns the 'Let'.
+            "var" => TokenKind::Var, // Returns the 'Var'.
+
             // Return error.
-            _ => {
-                eprintln!("Unknown word '{}' in {}:{}", word, line, column);
-                TokenKind::Unknown(word)
-            }
+            _ => TokenKind::Identifier(word),
         };
 
         Token { kind, line, column } // Return token.
@@ -188,6 +188,15 @@ impl Lexer {
                 ';' => {
                     tokens.push(Token {
                         kind: TokenKind::Semicolon,
+                        line,
+                        column,
+                    });
+                }
+
+                // If is '=', returns 'Equal'.
+                '=' => {
+                    tokens.push(Token {
+                        kind: TokenKind::Equal,
                         line,
                         column,
                     });

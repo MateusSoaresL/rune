@@ -1,2 +1,9 @@
-__print("Hello, ");
-__println("world!");
+var language = "Rune";
+
+__print("Name: ");
+__println(language);
+
+language = "Rune 2";
+
+__print("Name: ");
+__println(language);

@@ -2,7 +2,7 @@ use std::{env, fs, path::Path, process::Command};
 
 use crate::{
     backend::cranelift::compile,
-    frontend::{lexer::lexer::Lexer, parser::parser::Parser},
+    frontend::{lexer::lexer::Lexer, parser::parser::Parser, semantic::semantic::SemanticAnalyzer},
     middleend::lower::lower,
 };
 
@@ -68,6 +68,10 @@ fn main() {
             std::process::exit(1);
         }
     };
+    let mut semantic = SemanticAnalyzer::new();
+    if semantic.analyze(&ast).is_err() {
+        std::process::exit(1);
+    }
 
     // ===========|
     // MIDDLE-END |

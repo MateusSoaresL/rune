@@ -1,7 +1,8 @@
 // Expression.
 #[derive(Debug)]
 pub enum Expr {
-    String(String), // The variable string.
+    String(String),   // The variable string.
+    Variable(String), // The variable.
 }
 
 // The statement.
@@ -12,6 +13,19 @@ pub enum Statement {
 
     // The '__println("value");'.
     NativePrintln(Expr),
+
+    // For the variables.
+    VariableDeclaration {
+        name: String,  // The name.
+        value: Expr,   // The value.
+        mutable: bool, // If is mutable or not.
+    },
+
+    // For mutable variable.
+    Assignment {
+        name: String, // The name.
+        value: Expr,  // The new value.
+    },
 }
 
 // The program.

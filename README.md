@@ -1,8 +1,8 @@
 # Rune
 
-> **Version:** 0.0.2  
-> **Status:** Early Development  
-> **Implementation Language:** Rust  
+> **Version:** 0.0.3-alpha.1
+> **Status:** Early Development
+> **Implementation Language:** Rust
 > **Compilation:** Native / AOT
 
 Rune is an experimental compiled programming language built from scratch with a focus on learning compiler design, native code generation, and programming language architecture.
@@ -17,13 +17,17 @@ Rune source files use the `.rune` extension.
 
 Rune is currently in a very early stage of development.
 
-### println
+### Variables
 
-Rune provides the native `__println` instruction, and have a line break:
+Rune provides the native variables:
 
-```rune
-__println("Hello, world!");
-```
+`let` for imutable variables.
+
+`var` for mutable variables.
+
+### Type supported: String
+
+`String` is the unique type Rune support now.
 
 ## 📦 Installation
 

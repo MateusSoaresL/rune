@@ -1,9 +1,19 @@
 use cranelift::prelude::*;
 use cranelift_frontend::{FunctionBuilder, FunctionBuilderContext};
-use cranelift_module::{DataDescription, Linkage, Module, default_libcall_names};
+use cranelift_module::{DataDescription, DataId, Linkage, Module, default_libcall_names};
 use cranelift_object::{ObjectBuilder, ObjectModule};
 
 use crate::middleend::ir::{IrInstructions, IrProgram};
+
+use std::collections::HashMap;
+
+// The variable with some informations.
+struct VariableInfo {
+    data_id: DataId, // Data id.
+    length: i64,     // Length.
+    #[allow(dead_code)]
+    mutable: bool, // Mutable.
+}
 
 // The principal function to do the compile to work.
 pub fn compile(ir: &IrProgram) -> Result<(), String> {
@@ -100,6 +110,8 @@ pub fn compile(ir: &IrProgram) -> Result<(), String> {
 
     // String counter.
     let mut string_id = 0usize;
+
+    let mut variable: HashMap<String, VariableInfo> = HashMap::new();
 
     // Go through the IR.
     for instructions in &ir.instructions {
@@ -371,6 +383,122 @@ pub fn compile(ir: &IrProgram) -> Result<(), String> {
                     // Function's arguments.
                     &[address, length_value],
                 );
+            }
+
+            IrInstructions::DeclareVariable {
+                name,
+                value,
+                mutable,
+            } => {
+                // Transforms the string in bytes.
+                let bytes = value.as_bytes().to_vec();
+
+                // Save the length.
+                let length = bytes.len() as i64;
+
+                // Crete data, and the data will be saved in object file.
+                let mut data = DataDescription::new();
+
+                data.define(bytes.into_boxed_slice());
+
+                // Unic internal name.
+                let data_name = format!("rune_variable_{}", string_id);
+
+                string_id += 1;
+
+                // Declare the data block.
+                let data_id = module
+                    .declare_data(&data_name, Linkage::Local, false, false)
+                    .map_err(|error| error.to_string())?;
+
+                // Defines the content.
+                module
+                    .define_data(data_id, &data)
+                    .map_err(|error| error.to_string())?;
+
+                // Now, we will registry the variable.
+                variable.insert(
+                    name.clone(),
+                    VariableInfo {
+                        data_id,
+                        length,
+                        mutable: *mutable,
+                    },
+                );
+            }
+
+            IrInstructions::AssignVariable { name, value } => {
+                // New value in bytes.
+                let bytes = value.as_bytes().to_vec();
+
+                // Save the length.
+                let length = bytes.len() as i64;
+
+                // Crete data, and the data will be saved in object file.
+                let mut data = DataDescription::new();
+
+                data.define(bytes.into_boxed_slice());
+
+                // Unic internal name.
+                let data_name = format!("rune_variable_{}", string_id);
+
+                string_id += 1;
+
+                // Declare the data block.
+                let data_id = module
+                    .declare_data(&data_name, Linkage::Local, false, false)
+                    .map_err(|error| error.to_string())?;
+
+                // Defines the content.
+                module
+                    .define_data(data_id, &data)
+                    .map_err(|error| error.to_string())?;
+
+                // Update the variable.
+                let variable = variable
+                    .get_mut(name)
+                    .ok_or_else(|| format!("Backend error: variable '{}' not found!", name))?;
+
+                variable.data_id = data_id;
+                variable.length = length;
+            }
+
+            IrInstructions::PrintVariable(name) => {
+                // Search the variable.
+                let variable = variable
+                    .get(name)
+                    .ok_or_else(|| format!("Backend error: variable '{}' not found!", name))?;
+
+                // This function do Cranelift can enter the variable data.
+                let global_value = module.declare_data_in_func(variable.data_id, builder.func);
+
+                // Take the string address.
+                let address = builder.ins().global_value(pointer_type, global_value);
+
+                // Create the length.
+                let length_value = builder.ins().iconst(pointer_type, variable.length);
+
+                // Call rune_print(ptr, len).
+                builder.ins().call(print_ref, &[address, length_value]);
+            }
+
+            IrInstructions::PrintlnVariable(name) => {
+                // Search the variable.
+                let variable = variable
+                    .get(name)
+                    .ok_or_else(|| format!("Backend error: variable '{}' not found!", name))?;
+
+                // This function do Cranelift can enter the variable data.
+                let global_value = module.declare_data_in_func(variable.data_id, builder.func);
+
+                // Take the string address.
+                let address = builder.ins().global_value(pointer_type, global_value);
+
+                // Create the length.
+                let length_value = builder.ins().iconst(pointer_type, variable.length);
+
+                // Call rune_println(ptr, len).
+                builder.ins().call(println_ref, &[address, length_value]);
             }
         }
     }
