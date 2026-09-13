@@ -1,8 +1,25 @@
+// Math.
+#[derive(Debug)]
+pub enum BinaryOperator {
+    Add,      // '+'.
+    Subtract, // '-'.
+    Multiply, // '*'.
+    Divide,   // '/'.
+}
+
 // The expression.
 #[derive(Debug)]
 pub enum Expression {
     Identifier(String),    // Other keyword.
-    StringLiteral(String), // "Hello, world!"
+    StringLiteral(String), // "Hello, world!".
+    NumberLiteral(f64),    // Number.
+
+    // Math.
+    Binary {
+        left: Box<Expression>,
+        operator: BinaryOperator,
+        right: Box<Expression>,
+    },
 }
 
 // The statements.

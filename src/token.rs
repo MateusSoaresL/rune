@@ -3,6 +3,12 @@
 pub enum TokenKind {
     Identifier(String),    // Other keyword.
     StringLiteral(String), // "Hello, world!".
+    NumberLiteral(f64),    // Numbers.
+
+    Plus,  // '+'.
+    Minus, // '-'.
+    Star,  // '*'.
+    Slash, // '/'.
 
     LeftParen,  // '('.
     RightParen, // ')'.

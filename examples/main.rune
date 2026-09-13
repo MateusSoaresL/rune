@@ -1,2 +1,6 @@
 print("Hello, ");
 println("world!");
+
+println(10 + 20);
+println(2 + 3 * 4);
+println((2 + 3) * 4);

@@ -77,6 +77,46 @@ impl Lexer {
             self.line, self.column
         ))
     }
+    
+    // Just peek.
+    fn peek(&self) -> Option<char> {
+        self.source.get(self.position + 1).copied()
+    }
+
+    // For read the number.
+    fn read_number(&mut self) -> Result<f64, String> {
+        let start = self.position;
+
+        // Integer part.
+        while let Some(character) = self.position() {
+            if character.is_ascii_digit() {
+                self.advance();
+            } else {
+                break;
+            }
+        }
+
+        // Decimal part.
+        if self.position() == Some('.')
+            && self.peek().is_some_and(|character| character.is_ascii_digit())
+            {
+                self.advance(); // Consume '.'.
+
+                while let Some(character) = self.position() {
+                    if character.is_ascii_digit() {
+                        self.advance();
+                    } else {
+                        break;
+                    }
+                }
+            }
+
+        let number: String = self.source[start..self.position].iter().collect();
+
+        number
+            .parse::<f64>()
+            .map_err(|_| format!("Invalid number '{}'", number))
+    }
 
     pub fn tokenize(&mut self) -> Result<Vec<Token>, String> {
         let mut tokens = Vec::new();
@@ -137,6 +177,65 @@ impl Lexer {
                     });
 
                     self.advance();
+                }
+
+                // Plus.
+                '+' => {
+                    tokens.push(Token {
+                        kind: TokenKind::Plus,
+                        line: self.line,
+                        column: self.column,
+                    });
+
+                    self.advance();
+                }
+
+                // Minus.
+                '-' => {
+                    tokens.push(Token {
+                        kind: TokenKind::Minus,
+                        line: self.line,
+                        column: self.column,
+                    });
+
+                    self.advance();
+                }
+
+                // Star.
+                '*' => {
+                    tokens.push(Token {
+                        kind: TokenKind::Star,
+                        line: self.line,
+                        column: self.column,
+                    });
+
+                    self.advance();
+                }
+
+                // Slash.
+                '/' => {
+                    tokens.push(Token {
+                        kind: TokenKind::Slash,
+                        line: self.line,
+                        column: self.column,
+                    });
+
+                    self.advance();
+                }
+
+                // Numbers.
+                character if character.is_ascii_digit() || character == '.' => {
+                    // Before save the line and column.
+                    let line = self.line;
+                    let column = self.column;
+
+                    let value = self.read_number()?;
+
+                    tokens.push(Token {
+                        kind: TokenKind::NumberLiteral(value),
+                        line,
+                        column,
+                    });
                 }
 
                 // Check the keywords.
