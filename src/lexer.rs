@@ -223,6 +223,17 @@ impl Lexer {
                     self.advance();
                 }
 
+                // Equal.
+                '=' => {
+                    tokens.push(Token {
+                        kind: TokenKind::Equal,
+                        line: self.line,
+                        column: self.column,
+                    });
+
+                    self.advance();
+                }
+
                 // Numbers.
                 character if character.is_ascii_digit() || character == '.' => {
                     // Before save the line and column.

@@ -10,6 +10,8 @@ pub enum TokenKind {
     Star,  // '*'.
     Slash, // '/'.
 
+    Equal, // '='.
+
     LeftParen,  // '('.
     RightParen, // ')'.
 

@@ -30,4 +30,10 @@ pub enum Statement {
         expression: Expression, // The expression.
         newline: bool,          // The line break.
     },
+
+    // To print variable
+    VariableDeclaration {
+        name: String,
+        value: Expression,
+    },
 }

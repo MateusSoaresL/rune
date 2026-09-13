@@ -199,6 +199,38 @@ impl Parser {
         })
     }
 
+    fn parse_variable_declaration(&mut self) -> Result<Statement, String> {
+        let name = match self.position() {
+            Some(Token { kind: TokenKind::Identifier(name), ..}) => name.clone(),
+        
+            Some(token) => {
+                return Err(format!(
+                    "Expected variable name, found {:?} at {}:{}",
+                    token.kind,
+                    token.line,
+                    token.column,
+                ));
+            }
+
+            None => {
+                return Err(
+                    "Unexpected parser state: missing EOF token".to_string()
+                );
+            }
+        };
+
+        // Consume the 'let'.
+        self.advance();
+
+        self.expect(TokenKind::Equal)?;
+
+        let value = self.parse_expression()?;
+
+        self.expect(TokenKind::Semicolon)?;
+
+        Ok(Statement::VariableDeclaration { name, value })
+    }
+
     // Parse a statement.
     fn parse_statement(&mut self) -> Result<Statement, String> {
         let name = match self.position() {
@@ -228,6 +260,11 @@ impl Parser {
             "println" => {
                 self.advance();
                 self.parse_print(true)
+            }
+
+            "let" => {
+                self.advance();
+                self.parse_variable_declaration()
             }
 
             _ => Err(format!("Unknown statement '{}'", name)),

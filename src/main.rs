@@ -39,7 +39,7 @@ fn run() -> Result<(), String> {
 
     let statements = parser.parse()?;
 
-    let interpreter = Interpreter::new();
+    let mut interpreter = Interpreter::new();
 
     interpreter.run(&statements)?;
 
